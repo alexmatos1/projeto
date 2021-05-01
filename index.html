@@ -32,7 +32,7 @@
 <div class="row" style="width: 98%; margin: auto; margin-bottom: 25px">
     <div class="col-4">
         <label for="nome">Nome</label>
-        <input type="text" class="form-control" id="nome" > <!--  placeholder="Seu nome">-->
+        <input type="text" class="form-control" id="nome">
     </div>
     <div class="col-4">
         <label for="cpf">CPF</label>
@@ -102,7 +102,7 @@
 <div class="row" style="width: 98%; margin: auto; margin-bottom: 25px">
     <div class="col-4">
         <label for="cep">CEP</label>
-        <input type="text" class="form-control" id="cep" >
+        <input type="text" class="form-control" id="cep" name="cep">
     </div>
     <div class="col-4">
         <label for="logradouro">Logradouro</label>
@@ -173,7 +173,7 @@
         <td class="tg-0lax"><input type="text" class="form-control" id="seg_ini" onkeypress="$(this).mask('##:##');" maxlength="5"></td>
         <td class="tg-0lax"><input type="text" class="form-control" id="seg_fim" onkeypress="$(this).mask('##:##');" maxlength="5"></td>
         <td class="tg-0lax"><input type="number" class="form-control" id="seg_des" maxlength="5"></td>
-        <td class="tg-0lax"><input type="text" class="form-control"  id="seg_car" disabled></td>
+        <td class="tg-0lax"><input type="text" class="form-control" value="" id="seg_car" disabled></td>
     </tr>
     <tr onchange="verificarHorarioT()">
         <td class="tg-0lax" >Terça</td>
@@ -205,7 +205,7 @@
     </tr>
     <tr>
         <td class="tg-0lax" colspan="4">Carga horária semanal</td>
-        <td class="tg-0lax"><input type="text" class="form-control"  id="total" disabled></td>
+        <td class="tg-0lax"><input type="text" class="form-control"  id="total" nome="total" disabled></td>
     </tr>
     </tbody>
 </table>
@@ -243,31 +243,22 @@
     }
 
 
-    //função para buscar por CEP
-        $(document).ready(function() {
-        $("#cep").mask("99999-999",{completed:function(){
-                var cep = $(this).val().replace(/[^0-9]/, "");
+// Consulta CEP
+    $("#cep").mask("99999-999");
 
-                // Validação do CEP; caso o CEP não possua 8 números, então cancela
-                // a consulta
-                if(cep.length != 8){
-                    return false;
+    $('#cep').on('blur', function(){
+
+        if($.trim($("#cep").val()) != ""){
+
+            $.getScript("http://cep.republicavirtual.com.br/web_cep.php?formato=javascript&cep="+$("#cep").val(), function(){
+
+                if(resultadoCEP["resultado"]){
+                    $("#logradouro").val(unescape(resultadoCEP["tipo_logradouro"])+" "+unescape(resultadoCEP["logradouro"]));
                 }
 
-                // A url de pesquisa consiste no endereço do webservice + o cep que
-                // o usuário informou + o tipo de retorno desejado (entre "json",
-                // "jsonp", "xml", "piped" ou "querty")
-                var url = "https://viacep.com.br/ws/"+cep+"/json/";
-
-                $.getJSON(url, function(dadosRetorno){
-                    try{
-                        // Preenche os campos de acordo com o retorno da pesquisa
-                        $("#logradouro").val(dadosRetorno.logradouro);
-                        $("#numero").focus();
-                    }catch(ex){}
-                });
-            }});
-
+                $("#mensagem").html('');
+            });
+        }
     });
 
 
@@ -357,7 +348,7 @@
     function verificarDiferencaHorario(inicialMin, finalMin, descanso) {
         var totalMin = Number(finalMin - inicialMin - descanso);
 
-        var carga_segunda = document.getElementById("seg_car");
+         var carga_segunda = document.getElementById("seg_car");
 
         if(inicialMin && finalMin > 0) {
             carga_segunda.value = Math.trunc(totalMin / 60).toString();
@@ -365,31 +356,12 @@
         if(carga_segunda.value > 10 ){
             alert("Carga horária excedeu o limite diário de 10h");
         }
-
-
     }
-
 
     function verificarHorario() {
         var inicial_segunda = document.getElementById("seg_ini").value;
         var final_segunda = document.getElementById("seg_fim").value;
         var descanso_segunda = document.getElementById("seg_des").value;
-
-        /*var inicial_terca = document.getElementById("ter_ini").value;
-        var final_terca = document.getElementById("ter_fim").value;
-        var descanso_terca = document.getElementById("ter_des").value;
-
-        var inicial_quarta = document.getElementById("qua_ini").value;
-        var final_quarta = document.getElementById("qua_fim").value;
-        var descanso_quarta = document.getElementById("qua_des").value;
-
-        var inicial_quinta = document.getElementById("qui_ini").value;
-        var final_quinta = document.getElementById("qui_fim").value;
-        var descanso_quinta = document.getElementById("qui_des").value;
-
-        var inicial_sexta = document.getElementById("sex_ini").value;
-        var final_sexta = document.getElementById("sex_fim").value;
-        var descanso_sexta = document.getElementById("sex_des").value;*/
 
         var splInicial = inicial_segunda.split(":"), splFinal = final_segunda.split(":");
 
@@ -588,26 +560,5 @@
 
     }
 
-
-    // function horaSemanal(){
-        var hora_segunda = document.getElementById("seg_car").value;
-        var hora_terca = document.getElementById("ter_car").value;
-        var hora_quarta = document.getElementById("qua_car").value;
-        var hora_quinta = document.getElementById("qui_car").value;
-        var hora_sexta = document.getElementById("sex_car").value;
-
-        var hora_semana = document.getElementById("total");
-
-        var total_hora = hora_segunda + hora_terca + hora_quarta + hora_quinta + hora_sexta;
-
-        hora_semana.value = total_hora;
-
-        console.log(hora_semana.value);
-        console.log(hora_segunda);
-        console.log(hora_terca); 
-        console.log(hora_quarta);
-    //}
-
-    //horaSemanal();
 
 </script>
